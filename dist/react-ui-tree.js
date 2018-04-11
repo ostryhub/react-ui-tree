@@ -53,12 +53,14 @@ var UITree = function (_Component) {
     key: 'render',
     value: function render() {
       var tree = this.state.tree;
-      var dragging = this.state.dragging;
       var draggingDom = this.getDraggingDom();
 
       return _react2.default.createElement(
         'div',
-        { className: 'm-tree' },
+        { className: 'm-tree', ref: 'treeContainer',
+          onDrop: this.html_onDrop.bind(this),
+          onDragOver: this.html_onDragOver.bind(this)
+        },
         draggingDom,
         _react2.default.createElement(_node2.default, {
           tree: tree,
@@ -67,9 +69,31 @@ var UITree = function (_Component) {
           paddingLeft: this.props.paddingLeft,
           onDragStart: this.dragStart,
           onCollapse: this.toggleCollapse,
-          dragging: dragging && dragging.id
+          dragging: this.isDragging
         })
       );
+    }
+  }, {
+    key: 'isInside',
+    value: function isInside(e) {
+      var elem = this.refs.treeContainer;
+      var rect = elem.getBoundingClientRect();
+
+      var x = e.clientX;
+      var y = e.clientY;
+
+      return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
+    }
+  }, {
+    key: 'printDropData',
+    value: function printDropData(where, e) {
+      // var dragData = e.dataTransfer.getData("text/plain");
+      // console.log("tree printDropData "+where+", dragData: ", dragData, " e.target: ", e.target);
+    }
+  }, {
+    key: 'isDragging',
+    get: function get() {
+      return this.state.dragging && this.state.dragging.id;
     }
 
     // oh
@@ -110,6 +134,17 @@ var _initialiseProps = function _initialiseProps() {
     };
   };
 
+  this.copyTree = function (tree) {
+    var treeObj = JSON.parse(JSON.stringify(tree.obj));
+
+    var newTree = new _tree2.default(treeObj);
+    newTree.isNodeCollapsed = tree.isNodeCollapsed;
+    newTree.renderNode = tree.renderNode;
+    newTree.changeNodeCollapsed = tree.changeNodeCollapsed;
+    newTree.updateNodesPosition();
+    return newTree;
+  };
+
   this.getDraggingDom = function () {
     var _state = _this2.state,
         tree = _state.tree,
@@ -138,7 +173,36 @@ var _initialiseProps = function _initialiseProps() {
     return null;
   };
 
+  this.html_onDragOver = function (e) {
+    e.preventDefault();
+  };
+
+  this.html_onDrop = function (e) {
+    // console.log("on drop...");
+    e.preventDefault();
+
+    var dragDataJson = e.dataTransfer.getData("text/rect-ui-tree");
+    if (!dragDataJson) {
+      console.log("No d&d react-ui-tree data found.");
+      return;
+    }
+
+    var dragData = JSON.parse(dragDataJson);
+    var node = dragData.node;
+
+    if (!_this2.isDragging) {
+      var tree = _this2.state.tree;
+      tree.insert(node, 1, 0);
+      _this2.setState({
+        tree: tree
+      });
+
+      _this2.printDropData("html_onDrop", e);
+    }
+  };
+
   this.dragStart = function (id, dom, e) {
+
     _this2.dragging = {
       id: id,
       w: dom.offsetWidth,
@@ -147,27 +211,36 @@ var _initialiseProps = function _initialiseProps() {
       y: dom.offsetTop
     };
 
+    _this2.treeBeforeStartDrag = _this2.copyTree(_this2.state.tree);
+
     _this2._startX = dom.offsetLeft;
     _this2._startY = dom.offsetTop;
     _this2._offsetX = e.clientX;
     _this2._offsetY = e.clientY;
-    _this2._start = true;
+    _this2._draggingStarted = true;
 
-    window.addEventListener('mousemove', _this2.drag);
-    window.addEventListener('mouseup', _this2.dragEnd);
+    e.target.addEventListener('drag', _this2.drag);
+    e.target.addEventListener('dragend', _this2.dragEnd);
   };
 
   this.drag = function (e) {
-    if (_this2._start) {
+
+    if (!_this2.isInside(e)) {
+      _this2.dragCancel(e);
+      return;
+    }
+
+    if (_this2._draggingStarted) {
       _this2.setState({
         dragging: _this2.dragging
       });
-      _this2._start = false;
+      _this2._draggingStarted = false;
     }
 
     var tree = _this2.state.tree;
     var dragging = _this2.state.dragging;
     var paddingLeft = _this2.props.paddingLeft;
+
     var newIndex = null;
     var index = tree.getIndex(dragging.id);
     var collapsed = index.node.collapsed;
@@ -244,7 +317,7 @@ var _initialiseProps = function _initialiseProps() {
     });
   };
 
-  this.dragEnd = function () {
+  this.dragEnd = function (e) {
     _this2.setState({
       dragging: {
         id: null,
@@ -255,9 +328,31 @@ var _initialiseProps = function _initialiseProps() {
       }
     });
 
-    _this2.change(_this2.state.tree);
-    window.removeEventListener('mousemove', _this2.drag);
-    window.removeEventListener('mouseup', _this2.dragEnd);
+    e.target.removeEventListener('drag', _this2.drag);
+    e.target.removeEventListener('dragend', _this2.dragEnd);
+  };
+
+  this.dragCancel = function (e) {
+    e.target.removeEventListener('drag', _this2.drag);
+    e.target.removeEventListener('dragend', _this2.dragEnd);
+
+    if (_this2.treeBeforeStartDrag != null) {
+      var newTree = _this2.treeBeforeStartDrag;
+      _this2.treeBeforeStartDrag = null;
+
+      _this2.setState({
+        tree: newTree,
+        dragging: {
+          id: null,
+          x: null,
+          y: null,
+          w: null,
+          h: null
+        }
+      });
+
+      _this2.change(newTree);
+    }
   };
 
   this.change = function (tree) {

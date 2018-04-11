@@ -93,9 +93,24 @@ var UITreeNode = function (_Component) {
       var nodeId = _this.props.index.id;
       var dom = _this.refs.inner;
 
+      var node = _this.props.tree.getIndex(nodeId).node;
+
+      var dragData = {
+        nodeId: nodeId,
+        node: node
+      };
+
       if (_this.props.onDragStart) {
         _this.props.onDragStart(nodeId, dom, e);
       }
+
+      return dragData;
+    }, _this.html_onDragStart = function (e) {
+      var dragData = _this.handleMouseDown(e);
+      var jsonData = JSON.stringify(dragData);
+      e.dataTransfer.setData("text/rect-ui-tree", jsonData);
+
+      _this.printDropData("html_onDragStart", e);
     }, _temp), _possibleConstructorReturn(_this, _ret);
   }
 
@@ -120,12 +135,22 @@ var UITreeNode = function (_Component) {
         },
         _react2.default.createElement(
           'div',
-          { className: 'inner', ref: 'inner', onMouseDown: this.handleMouseDown },
+          { className: 'inner', ref: 'inner'
+            // onMouseDown={this.handleMouseDown}
+            , draggable: true,
+            onDragStart: this.html_onDragStart.bind(this)
+          },
           this.renderCollapse(),
-          tree.renderNode(node)
+          tree.renderNode(node, index)
         ),
         node.collapsed ? null : this.renderChildren()
       );
+    }
+  }, {
+    key: 'printDropData',
+    value: function printDropData(where, e) {
+      // var dragData = e.dataTransfer.getData("text/plain");
+      // console.log("printDropData "+where+", dragData: ", dragData, " e.target: ", e.target);
     }
   }]);
 
