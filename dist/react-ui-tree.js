@@ -82,7 +82,7 @@ var UITree = function (_Component) {
       var x = e.clientX;
       var y = e.clientY;
 
-      return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
+      return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
     }
   }, {
     key: 'printDropData',
