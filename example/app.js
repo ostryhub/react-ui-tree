@@ -53,6 +53,7 @@ class App extends Component {
             tree={this.state.tree}
             onChange={this.handleChange}
             isNodeCollapsed={this.isNodeCollapsed}
+            isNodeReorderEnabled={true}
             renderNode={this.renderNode}
           />
         </div>
@@ -64,6 +65,7 @@ class App extends Component {
             tree={this.state.tree2}
             onChange={this.handleChange2}
             isNodeCollapsed={this.isNodeCollapsed}
+            isNodeReorderEnabled={false}
             renderNode={this.renderNode}
           />
         </div>

@@ -54,6 +54,7 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "js-tree": "^2.0.1",
-    "prop-types": "^15.5.10"
+    "prop-types": "^15.5.10",
+    "uuid": "^3.2.1"
   }
 }

@@ -70,6 +70,7 @@ var UITreeNode = function (_Component) {
 
             return _react2.default.createElement(UITreeNode, {
               tree: tree,
+              getParentUUID: _this.props.getParentUUID,
               index: childIndex,
               key: childIndex.id,
               dragging: dragging,
@@ -97,8 +98,11 @@ var UITreeNode = function (_Component) {
 
       var dragData = {
         nodeId: nodeId,
-        node: node
+        node: node,
+        uuid: _this.props.getParentUUID()
       };
+
+      console.log("dragData", dragData);
 
       if (_this.props.onDragStart) {
         _this.props.onDragStart(nodeId, dom, e);

@@ -18,6 +18,10 @@ var _node = require('./node');
 
 var _node2 = _interopRequireDefault(_node);
 
+var _v = require('uuid/v1');
+
+var _v2 = _interopRequireDefault(_v);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -36,6 +40,7 @@ var UITree = function (_Component) {
 
     _initialiseProps.call(_this);
 
+    _this._uuid = (0, _v2.default)();
     _this.state = _this.init(props);
     return _this;
   }
@@ -48,6 +53,11 @@ var UITree = function (_Component) {
       } else {
         this._updated = false;
       }
+    }
+  }, {
+    key: 'getUUID',
+    value: function getUUID() {
+      return this.state.uuid;
     }
   }, {
     key: 'render',
@@ -64,6 +74,7 @@ var UITree = function (_Component) {
         draggingDom,
         _react2.default.createElement(_node2.default, {
           tree: tree,
+          getParentUUID: this.getUUID.bind(this),
           index: tree.getIndex(1),
           key: 1,
           paddingLeft: this.props.paddingLeft,
@@ -122,8 +133,12 @@ var _initialiseProps = function _initialiseProps() {
     tree.changeNodeCollapsed = props.changeNodeCollapsed;
     tree.updateNodesPosition();
 
+    var nodeReorderEnabled = !!props.isNodeReorderEnabled;
+
     return {
+      uuid: _this2._uuid,
       tree: tree,
+      isNodeReorderEnabled: nodeReorderEnabled,
       dragging: {
         id: null,
         x: null,
@@ -165,7 +180,8 @@ var _initialiseProps = function _initialiseProps() {
         _react2.default.createElement(_node2.default, {
           tree: tree,
           index: draggingIndex,
-          paddingLeft: _this2.props.paddingLeft
+          paddingLeft: _this2.props.paddingLeft,
+          getParentUUID: _this2.getUUID.bind(_this2)
         })
       );
     }
@@ -178,7 +194,6 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.html_onDrop = function (e) {
-    // console.log("on drop...");
     e.preventDefault();
 
     var dragDataJson = e.dataTransfer.getData("text/rect-ui-tree");
@@ -188,6 +203,9 @@ var _initialiseProps = function _initialiseProps() {
     }
 
     var dragData = JSON.parse(dragDataJson);
+
+    if (dragData.uuid == _this2.state.uuid) return;
+
     var node = dragData.node;
 
     if (!_this2.isDragging) {
@@ -202,6 +220,11 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.dragStart = function (id, dom, e) {
+
+    console.log("this.state.isNodeReorderEnabled: ", _this2.state.isNodeReorderEnabled);
+    if (_this2.state.isNodeReorderEnabled == false) return;
+
+    _this2.dragAndDropActive = true;
 
     _this2.dragging = {
       id: id,
