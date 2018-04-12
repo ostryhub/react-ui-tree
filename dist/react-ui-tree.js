@@ -96,6 +96,12 @@ var UITree = function (_Component) {
       return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
     }
   }, {
+    key: 'isDropAllowed',
+    value: function isDropAllowed(node, dropEvent) {
+      var isAllowed = typeof this.props.dropAllowedPredicate === "function" ? this.props.dropAllowedPredicate(node, dropEvent) : true;
+      return isAllowed;
+    }
+  }, {
     key: 'printDropData',
     value: function printDropData(where, e) {
       // var dragData = e.dataTransfer.getData("text/plain");
@@ -208,7 +214,7 @@ var _initialiseProps = function _initialiseProps() {
 
     var node = dragData.node;
 
-    if (!_this2.isDragging) {
+    if (!_this2.isDragging && _this2.isDropAllowed(node, e)) {
       var tree = _this2.state.tree;
       tree.insert(node, 1, 0);
       _this2.setState({
@@ -216,6 +222,8 @@ var _initialiseProps = function _initialiseProps() {
       });
 
       _this2.printDropData("html_onDrop", e);
+
+      _this2.notifyTreeChanged(_this2.state.tree);
     }
   };
 
