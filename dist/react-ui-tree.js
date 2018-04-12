@@ -103,7 +103,7 @@ var UITree = function (_Component) {
     }
   }, {
     key: 'transformDroppedNodeDelegate',
-    value: function transformDroppedNodeDelegate(node, dropeEvent) {
+    value: function transformDroppedNodeDelegate(node, dropEvent) {
       var transformer = this.props.transformDroppedNodeDelegate || function (node, dropEvent) {
         return node;
       };
