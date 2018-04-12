@@ -102,6 +102,14 @@ var UITree = function (_Component) {
       return isAllowed;
     }
   }, {
+    key: 'transformDroppedNodeDelegate',
+    value: function transformDroppedNodeDelegate(node, dropeEvent) {
+      var transformer = this.props.transformDroppedNodeDelegate || function (node, dropEvent) {
+        return node;
+      };
+      return transformer(node, dropEvent);
+    }
+  }, {
     key: 'printDropData',
     value: function printDropData(where, e) {
       // var dragData = e.dataTransfer.getData("text/plain");
@@ -215,8 +223,9 @@ var _initialiseProps = function _initialiseProps() {
     var node = dragData.node;
 
     if (!_this2.isDragging && _this2.isDropAllowed(node, e)) {
+      var transformedNode = _this2.transformDroppedNodeDelegate(node, e);
       var tree = _this2.state.tree;
-      tree.insert(node, 1, 0);
+      tree.insert(transformedNode, 1, 0);
       _this2.setState({
         tree: tree
       });
