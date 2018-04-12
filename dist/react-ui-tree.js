@@ -98,7 +98,7 @@ var UITree = function (_Component) {
   }, {
     key: 'isDropAllowed',
     value: function isDropAllowed(node, dropEvent) {
-      var isAllowed = typeof this.props.dropAllowedPredicate === "function" ? this.props.dropAllowedPredicate(node, dropEvent) : true;
+      var isAllowed = typeof this.props.isDropAllowedPredicate === "function" ? this.props.isDropAllowedPredicate(node, dropEvent) : true;
       return isAllowed;
     }
   }, {
