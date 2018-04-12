@@ -351,6 +351,8 @@ var _initialiseProps = function _initialiseProps() {
       }
     });
 
+    _this2.notifyTreeChanged(_this2.state.tree);
+
     e.target.removeEventListener('drag', _this2.drag);
     e.target.removeEventListener('dragend', _this2.dragEnd);
   };
@@ -374,11 +376,11 @@ var _initialiseProps = function _initialiseProps() {
         }
       });
 
-      _this2.change(newTree);
+      _this2.notifyTreeChanged(newTree);
     }
   };
 
-  this.change = function (tree) {
+  this.notifyTreeChanged = function (tree) {
     _this2._updated = true;
     if (_this2.props.onChange) _this2.props.onChange(tree.obj);
   };
@@ -394,7 +396,7 @@ var _initialiseProps = function _initialiseProps() {
       tree: tree
     });
 
-    _this2.change(tree);
+    _this2.notifyTreeChanged(tree);
   };
 };
 
